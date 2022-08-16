@@ -1,5 +1,5 @@
 /**
- * @file fifo.c
+ * @file fifo_utils.c
  * @author savent (savent_gate@outlook.com)
  * @brief
  * @version 0.1
@@ -8,7 +8,7 @@
  * Copyright 2022 savent_gate
  *
  */
-#include "fifo.h"
+#include "fifo_utils.h"
 #include <assert.h>
 #include <string.h>
 

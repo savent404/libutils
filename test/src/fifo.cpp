@@ -9,7 +9,7 @@
  *
  */
 
-#include "fifo.h"
+#include "fifo_utils.h"
 #include <cmath>
 #include <gtest/gtest.h>
 

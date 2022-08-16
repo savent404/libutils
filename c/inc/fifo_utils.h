@@ -1,5 +1,5 @@
 /**
- * @file fifo.h
+ * @file fifo_utils.h
  * @author savent (savent_gate@outlook.com)
  * @brief
  * @version 0.1
