@@ -39,7 +39,7 @@ static inline size_t _index_in_arr_normal(int i, size_t arr_len) {
   return (i + arr_len) % arr_len;
 }
 
-static inline void *_get_pointer(void *ptr, size_t index,
+static inline void *_get_pointer(const void *ptr, size_t index,
                                  size_t item_type_size) {
   char *p = (char *)ptr;
   return p + index * item_type_size;
@@ -63,7 +63,7 @@ bool fifo_full(fifo_t *ptr) {
   return fifo_len(ptr) == ptr->fifo_len - 1;
 }
 
-void fifo_push(fifo_t *ptr, void *data, size_t num) {
+void fifo_push(fifo_t *ptr, const void *data, size_t num) {
   assert(ptr);
   assert(fifo_len(ptr) + num <= fifo_capacity(ptr));
   size_t index = ptr->index_end;

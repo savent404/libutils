@@ -82,7 +82,7 @@ bool fifo_full(fifo_t *ptr);
  * @param[in] data
  * @param num
  */
-void fifo_push(fifo_t *ptr, void *data, size_t num);
+void fifo_push(fifo_t *ptr, const void *data, size_t num);
 
 /**
  * @brief pop item from fifo
