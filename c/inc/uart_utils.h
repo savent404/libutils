@@ -84,11 +84,25 @@ size_t uart_read(uart_t *inst, char *c, size_t num);
 void uart_enable_tx(uart_t *inst);
 
 /**
+ * @brief disable async transmit
+ * 
+ * @param inst 
+ */
+void uart_disable_tx(uart_t *inst);
+
+/**
  * @brief enable async recv
  *
  * @param inst
  */
 void uart_enable_rx(uart_t *inst);
+
+/**
+ * @brief disable async recv
+ * 
+ * @param inst 
+ */
+void uart_disable_rx(uart_t *inst);
 
 /**
  * @brief get current status
