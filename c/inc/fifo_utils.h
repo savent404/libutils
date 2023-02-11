@@ -93,6 +93,15 @@ void fifo_push(fifo_t *ptr, const void *data, size_t num);
  */
 void fifo_pop(fifo_t *ptr, void *data, size_t num);
 
+/**
+ * @brief peek fifo's data dont pop out
+ *
+ * @param ptr fifo pointer
+ * @param index 0~fifo_len-1
+ * @param[out] data
+ */
+void fifo_peek(fifo_t *ptr, int index, void *data);
+
 #ifdef __cplusplus
 }
 #endif

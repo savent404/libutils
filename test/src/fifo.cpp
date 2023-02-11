@@ -86,3 +86,22 @@ TEST(fifo, simple_io_3) {
   }
   ASSERT_TRUE(fifo_full(ptr));
 }
+
+TEST(fifo, simple_io_4) {
+  FIFO_DEFINE(c, 128, int);
+  fifo_t *ptr = FIFO_PTR(c);
+
+  for (int i = 0; i < 127; i++) {
+    fifo_push(ptr, &i, 1);
+  }
+
+  ASSERT_EQ(fifo_len(ptr), 127);
+
+  for (int i = 0; i < 127; i++) {
+    int t;
+    fifo_peek(ptr, i, &t);
+    ASSERT_EQ(t, i);
+  }
+
+  ASSERT_EQ(fifo_len(ptr), 127);
+}
