@@ -30,18 +30,20 @@ static void stm32_uart_tx_async(const char *ch, void *data) {
 }
 
 static void stm32_uart_tx_async_abort(void *data) {
-  HAL_UART_AbortTransmit_IT(to_huart(data));
+  // no need to abort tx in interrupt mode
+  // HAL_UART_AbortTransmit_IT(to_huart(data));
 }
 
 static void stm32_uart_rx_async_abort(void *data) {
-  HAL_UART_AbortReceive_IT(to_huart(data));
+  // no need to abort rx in interrupt mode
+  // HAL_UART_AbortReceive_IT(to_huart(data));
 }
 
 static void stm32_isr_tx_handler(UART_HandleTypeDef *huart) {
   uart_t *inst;
   for (int i = 0; i < stm32_instance_num; i++) {
     inst = stm32_instance[i];
-    if (to_huart(inst->data)->Instance == huart->Instance) {
+    if (to_huart(inst->privdata)->Instance == huart->Instance) {
       uart_isr_handle_tx(inst);
       return;
     }
@@ -52,7 +54,7 @@ static void stm32_isr_rx_handler(UART_HandleTypeDef *huart) {
   uart_t *inst;
   for (int i = 0; i < stm32_instance_num; i++) {
     inst = stm32_instance[i];
-    if (to_huart(inst->data)->Instance == huart->Instance) {
+    if (to_huart(inst->privdata)->Instance == huart->Instance) {
       uart_isr_handle_rx(inst);
       return;
     }
@@ -69,6 +71,10 @@ uart_t *stm32_uart_init(UART_HandleTypeDef *huart) {
     if (!stm32_instance[i]) {
       index = i;
       break;
+    } else if (to_uart(stm32_instance[i]->privdata) &&
+               to_uart(stm32_instance[i]->privdata)->Instance ==
+                   huart->Instance) {
+      return stm32_instance[i];
     }
   }
 
@@ -96,7 +102,7 @@ uart_t *stm32_uart_init(UART_HandleTypeDef *huart) {
   if (!inst->tx_fifo)
     goto fatal5;
 
-  inst->data = huart;
+  inst->privdata = huart;
   inst->status = uart_status_idle;
   inst->tx_enable = 0;
   inst->rx_enable = 0;

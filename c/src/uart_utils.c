@@ -23,7 +23,7 @@ void uart_init(uart_t *inst, const uart_io_t *io, void *data_ptr,
   inst->rx_fifo = rx_fifo;
   inst->tx_fifo = tx_fifo;
   inst->io = io;
-  inst->data = data_ptr;
+  inst->privdata = data_ptr;
   inst->rx_enable = false;
   inst->tx_enable = false;
 }
@@ -60,16 +60,16 @@ void uart_enable_tx(uart_t *inst) {
   assert(inst);
   const uart_io_t *io = inst->io;
   fifo_t *fifo = inst->tx_fifo;
-  void *data = inst->data;
+  void *privdata = inst->privdata;
   inst->tx_enable = true;
   switch (inst->status) {
   case uart_status_rx:
-    io->uart_rx_async_abort(data);
+    io->uart_rx_async_abort(privdata);
   case uart_status_idle:
     if (fifo_len(fifo)) {
       fifo_pop(fifo, &inst->tx_tmp, 1);
       inst->status = uart_status_tx;
-      io->uart_tx_async(&inst->tx_tmp, data);
+      io->uart_tx_async(&inst->tx_tmp, privdata);
     }
     break;
   case uart_status_tx:
@@ -82,14 +82,14 @@ void uart_enable_tx(uart_t *inst) {
 void uart_disable_tx(uart_t *inst) {
   assert(inst);
   const uart_io_t *io = inst->io;
-  void *data = inst->data;
+  void *privdata = inst->privdata;
   inst->tx_enable = false;
   switch (inst->status) {
   case uart_status_rx:
   case uart_status_idle:
     break;
   case uart_status_tx:
-    io->uart_tx_async_abort(data);
+    io->uart_tx_async_abort(privdata);
     inst->status = uart_status_idle;
     break;
   default:
@@ -100,14 +100,14 @@ void uart_disable_tx(uart_t *inst) {
 void uart_enable_rx(uart_t *inst) {
   assert(inst);
   const uart_io_t *io = inst->io;
-  void *data = inst->data;
+  void *privdata = inst->privdata;
   inst->rx_enable = true;
   switch (inst->status) {
   case uart_status_tx:
-    io->uart_tx_async_abort(data);
+    io->uart_tx_async_abort(privdata);
   case uart_status_idle:
     inst->status = uart_status_rx;
-    io->uart_rx_async(&inst->rx_tmp, data);
+    io->uart_rx_async(&inst->rx_tmp, privdata);
     break;
   case uart_status_rx:
     break;
@@ -119,14 +119,14 @@ void uart_enable_rx(uart_t *inst) {
 void uart_disable_rx(uart_t *inst) {
   assert(inst);
   const uart_io_t *io = inst->io;
-  void *data = inst->data;
+  void *privdata = inst->privdata;
   inst->rx_enable = false;
   switch (inst->status) {
   case uart_status_tx:
   case uart_status_idle:
     break;
   case uart_status_rx:
-    io->uart_rx_async_abort(data);
+    io->uart_rx_async_abort(privdata);
     break;
   default:
     assert(false);
@@ -137,16 +137,16 @@ void uart_isr_handle_rx(uart_t *inst) {
   assert(inst);
   fifo_t *fifo = inst->rx_fifo;
   const uart_io_t *io = inst->io;
-  void *data = inst->data;
+  void *privdata = inst->privdata;
 
   if (!fifo_full(fifo)) {
     fifo_push(fifo, &inst->rx_tmp, 1);
-    io->uart_rx_async(&inst->rx_tmp, data);
+    io->uart_rx_async(&inst->rx_tmp, privdata);
   } else {
     // NOTE: completely disable uart rx if fifo is full
     inst->status = uart_status_idle;
     inst->rx_enable = false;
-    io->uart_rx_async_abort(data);
+    io->uart_rx_async_abort(privdata);
   }
 }
 
@@ -154,16 +154,16 @@ void uart_isr_handle_tx(uart_t *inst) {
   assert(inst);
   fifo_t *fifo = inst->tx_fifo;
   const uart_io_t *io = inst->io;
-  void *data = inst->data;
+  void *privdata = inst->privdata;
   if (!fifo_len(fifo)) {
     if (inst->rx_enable && !fifo_full(inst->rx_fifo)) {
       inst->status = uart_status_rx;
-      io->uart_rx_async(&inst->rx_tmp, data);
+      io->uart_rx_async(&inst->rx_tmp, privdata);
     } else {
       inst->status = uart_status_idle;
     }
   } else {
     fifo_pop(fifo, &inst->tx_tmp, 1);
-    inst->io->uart_tx_async(&inst->tx_tmp, data);
+    inst->io->uart_tx_async(&inst->tx_tmp, privdata);
   }
 }
