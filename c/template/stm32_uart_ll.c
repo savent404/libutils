@@ -11,6 +11,7 @@
 
 #include "uart_utils.h"
 #include "usart.h"
+#include <assert.h>
 #include <stdlib.h>
 
 static uart_t *stm32_instance[4] = {NULL};
@@ -61,7 +62,7 @@ static void stm32_isr_rx_handler(UART_HandleTypeDef *huart) {
   }
 }
 
-uart_t *stm32_uart_init(UART_HandleTypeDef *huart) {
+uart_t *stm32_uart_init(UART_HandleTypeDef *huart, fifo_t *rx, fifo_t *tx) {
   uart_t *inst;
   uart_io_t *io;
   const int fifo_size = 32;
@@ -71,8 +72,8 @@ uart_t *stm32_uart_init(UART_HandleTypeDef *huart) {
     if (!stm32_instance[i]) {
       index = i;
       break;
-    } else if (to_uart(stm32_instance[i]->privdata) &&
-               to_uart(stm32_instance[i]->privdata)->Instance ==
+    } else if (to_huart(stm32_instance[i]->privdata) &&
+               to_huart(stm32_instance[i]->privdata)->Instance ==
                    huart->Instance) {
       return stm32_instance[i];
     }
@@ -94,32 +95,41 @@ uart_t *stm32_uart_init(UART_HandleTypeDef *huart) {
   io->uart_tx_async_abort = stm32_uart_tx_async_abort;
   inst->io = io;
 
-  inst->rx_fifo = malloc(sizeof(*inst->rx_fifo));
-  if (!inst->rx_fifo)
-    goto fatal4;
+  if (!rx && !tx) {
+    inst->rx_fifo = malloc(sizeof(*inst->rx_fifo));
+    if (!inst->rx_fifo)
+      goto fatal4;
 
-  inst->tx_fifo = malloc(sizeof(*inst->tx_fifo));
-  if (!inst->tx_fifo)
-    goto fatal5;
+    inst->tx_fifo = malloc(sizeof(*inst->tx_fifo));
+    if (!inst->tx_fifo)
+      goto fatal5;
 
-  inst->privdata = huart;
-  inst->status = uart_status_idle;
-  inst->tx_enable = 0;
-  inst->rx_enable = 0;
+    inst->privdata = huart;
+    inst->status = uart_status_idle;
+    inst->tx_enable = 0;
+    inst->rx_enable = 0;
 
-  inst->rx_fifo->buffer = malloc(fifo_size * 2);
-  if (!inst->rx_fifo->buffer)
-    goto fatal6;
-  inst->rx_fifo->fifo_len = fifo_size;
-  inst->rx_fifo->type_len = 1;
-  inst->rx_fifo->index_start = 0;
-  inst->rx_fifo->index_end = 0;
+    inst->rx_fifo->buffer = malloc(fifo_size * 2);
+    if (!inst->rx_fifo->buffer)
+      goto fatal6;
+    inst->rx_fifo->fifo_len = fifo_size;
+    inst->rx_fifo->type_len = 1;
+    inst->rx_fifo->index_start = 0;
+    inst->rx_fifo->index_end = 0;
 
-  inst->tx_fifo->fifo_len = fifo_size;
-  inst->tx_fifo->type_len = 1;
-  inst->tx_fifo->index_start = 0;
-  inst->tx_fifo->index_end = 0;
-  inst->tx_fifo->buffer = ((char *)inst->rx_fifo->buffer) + fifo_size;
+    inst->tx_fifo->fifo_len = fifo_size;
+    inst->tx_fifo->type_len = 1;
+    inst->tx_fifo->index_start = 0;
+    inst->tx_fifo->index_end = 0;
+    inst->tx_fifo->buffer = ((char *)inst->rx_fifo->buffer) + fifo_size;
+  } else {
+    inst->rx_fifo = rx;
+    inst->tx_fifo = tx;
+    assert(inst->tx_fifo->type_len == 1);
+    assert(inst->tx_fifo->buffer);
+    assert(inst->rx_fifo->type_len == 1);
+    assert(inst->rx_fifo->buffer);
+  }
 
   HAL_UART_RegisterCallback(huart, HAL_UART_TX_COMPLETE_CB_ID,
                             stm32_isr_tx_handler);

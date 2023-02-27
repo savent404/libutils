@@ -18,9 +18,11 @@
  * @brief init uart instance from huart
  *
  * @param huart
+ * @param rx fifo pointer, leave NULL will allocate it automatically(default fifo size)
+ * @param tx fifo pointer, leave NULL will allocate it automatically(default fifo size)
  * @return uart_t*
  */
-uart_t *stm32_uart_init(UART_HandleTypeDef *huart);
+uart_t *stm32_uart_init(UART_HandleTypeDef *huart, fifo_t *rx, fifo_t *tx);
 
 /**
  * @brief deinit uart instance(not huart)
