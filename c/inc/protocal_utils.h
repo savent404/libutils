@@ -25,6 +25,7 @@ extern "C" {
  * @retval 0 not match
  * @return N>0 frame matched, frame has N bytes
  * @return N<0 frame not mathed, should drop N bytes
+ * @return N=0 frame not matched, drop none byte
  */
 typedef int (*protocal_match_fn_t)(fifo_t *ptr);
 
@@ -36,7 +37,7 @@ typedef int (*protocal_match_fn_t)(fifo_t *ptr);
  * @param[out] dest buffer
  * @param[in] dest buffer max size
  * @return N > 0 find a frame, frame size is N bytes
- * @return false no frame found
+ * @return N = 0 no frame found
  */
 int protocal_find_frame(fifo_t *fifo, protocal_match_fn_t fn, void *buffer,
                         size_t buff_size);

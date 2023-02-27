@@ -17,10 +17,13 @@ int protocal_find_frame(fifo_t *fifo, protocal_match_fn_t fn, void *buffer,
 
   assert(fifo && fifo->type_len == 1);
 
+  if (!fifo_len(fifo)) {
+    return 0;
+  }
   re = fn(fifo);
 
-  if (re <= 0) {
-    re = !re ? 1 : -re;
+  if (re < 0) {
+    re = -re;
     for (int i = 0; i < re; i++) {
       fifo_pop(fifo, buffer, 1);
     }
