@@ -22,20 +22,20 @@ static inline UART_HandleTypeDef *to_huart(void *data) {
   return (UART_HandleTypeDef *)data;
 }
 
-static void stm32_uart_rx_async(char *ch, void *data) {
+__attribute__((weak)) void stm32_uart_rx_async(char *ch, void *data) {
   HAL_UART_Receive_IT(to_huart(data), (uint8_t *)ch, 1);
 }
 
-static void stm32_uart_tx_async(const char *ch, void *data) {
+__attribute__((weak)) void stm32_uart_tx_async(const char *ch, void *data) {
   HAL_UART_Transmit_IT(to_huart(data), (uint8_t *)ch, 1);
 }
 
-static void stm32_uart_tx_async_abort(void *data) {
+__attribute__((weak)) void stm32_uart_tx_async_abort(void *data) {
   // no need to abort tx in interrupt mode
   // HAL_UART_AbortTransmit_IT(to_huart(data));
 }
 
-static void stm32_uart_rx_async_abort(void *data) {
+__attribute__((weak)) void stm32_uart_rx_async_abort(void *data) {
   // no need to abort rx in interrupt mode
   // HAL_UART_AbortReceive_IT(to_huart(data));
 }
