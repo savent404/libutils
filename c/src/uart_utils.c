@@ -38,7 +38,7 @@ size_t uart_write(uart_t *inst, const char *c, size_t num) {
     write_len = num;
   fifo_push(fifo, c, write_len);
 
-  if (inst->tx_enable) {
+  if (!inst->tx_enable) {
     uart_enable_tx(inst);
   }
   return write_len;
@@ -156,6 +156,7 @@ void uart_isr_handle_tx(uart_t *inst) {
   const uart_io_t *io = inst->io;
   void *privdata = inst->privdata;
   if (!fifo_len(fifo)) {
+    inst->tx_enable = false;
     if (inst->rx_enable && !fifo_full(inst->rx_fifo)) {
       inst->status = uart_status_rx;
       io->uart_rx_async(&inst->rx_tmp, privdata);
