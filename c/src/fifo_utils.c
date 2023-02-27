@@ -10,9 +10,10 @@
  */
 #include "fifo_utils.h"
 #include <assert.h>
+#include <math.h>
 #include <string.h>
 
-// static inline int ffs(unsigned x) { return __builtin_ffs(x); }
+static inline int ffs(unsigned x) { retrn __builtin_ffs(x); }
 
 static bool _is_aligned_fifo_len(fifo_t *ptr) {
   int bit_count = 0;
@@ -88,7 +89,8 @@ static inline int _fifo_peek(fifo_t *ptr, int offset, void *data, size_t num) {
   assert(_is_aligned_fifo_len(ptr));
   assert(fifo_len(ptr) >= num);
   size_t fifo_len = ptr->fifo_len;
-  size_t index = _index_in_arr_with_arr_aligned(ptr->index_start + offset, fifo_len);
+  size_t index =
+      _index_in_arr_with_arr_aligned(ptr->index_start + offset, fifo_len);
   size_t type_size = ptr->type_len;
   char *buffer = (char *)ptr->buffer;
   for (size_t i = 0; i < num; i++) {
