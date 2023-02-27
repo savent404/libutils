@@ -13,7 +13,7 @@
 #include <math.h>
 #include <string.h>
 
-static inline int ffs(unsigned x) { retrn __builtin_ffs(x); }
+static inline int ffs(unsigned x) { return __builtin_ffs(x); }
 
 static bool _is_aligned_fifo_len(fifo_t *ptr) {
   int bit_count = 0;
